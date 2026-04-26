@@ -1,12 +1,13 @@
 {
-  "name": "erics-review-harness",
-  "description": "Post-edit lint hook for Claude Code: deterministic enforcement of project rules so the LLM can't drift",
-  "version": "0.1.0",
+  "name": "ast-checker",
+  "description": "Runs ast-grep architecture rules on every Claude edit. Ships a curated catalog of rules for common LLM shortcuts. Multi-language via tree-sitter.",
+  "version": "0.2.0",
   "author": {
     "name": "Eric Shen"
   },
   "license": "MIT",
   "keywords": [
+    "ast-grep",
     "linting",
     "hooks",
     "claude-code",
