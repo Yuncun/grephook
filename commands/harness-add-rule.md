@@ -12,7 +12,7 @@ List available templates from `${CLAUDE_PLUGIN_ROOT}/templates/`:
 2. For each file, read the metadata header (lines starting with `#`) and extract:
    - The "Catches:" line (after the colon)
    - The `language:` field from the rule body
-3. Print a table:
+3. Print a table (use the actual extracted Catches text per file, not these examples):
 
 | Rule | Catches | Language |
 |---|---|---|
@@ -20,7 +20,11 @@ List available templates from `${CLAUDE_PLUGIN_ROOT}/templates/`:
 | handler-defer-persist | Persistence calls inside handlers that should defer to accept/commit | Python |
 | routes-must-use-service | Route handlers calling backend methods directly | Python |
 
-Tell the user to re-run with: `/harness add-rule <name>`.
+Then print these next steps:
+
+> To install one from the catalog: `/harness add-rule <name>`
+>
+> To write a CUSTOM rule not in this catalog (e.g., language-specific or project-specific patterns), just ask in natural language — e.g., "add an ast-grep rule to ban console.log in components." The `writing-ast-grep-rules` skill handles pattern, format, and testing.
 
 ## If a rule name argument is given
 
