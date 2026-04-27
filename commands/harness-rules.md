@@ -1,10 +1,10 @@
 ---
-description: Add an ast-grep rule from the catalog to your project (no args = list available)
+description: Browse the ast-grep rule catalog (no args) or install a rule from it (with name arg)
 ---
 
-The user wants to add a rule from the ast-checker template catalog. The argument (if any) is the rule name (e.g., `handler-defer-persist`).
+The user invoked `/harness rules`. The argument (if any) is a rule name to install.
 
-## If no argument given
+## If no argument given — list the catalog
 
 List available templates from `${CLAUDE_PLUGIN_ROOT}/templates/`:
 
@@ -22,11 +22,11 @@ List available templates from `${CLAUDE_PLUGIN_ROOT}/templates/`:
 
 Then print these next steps:
 
-> To install one from the catalog: `/harness add-rule <name>`
+> To install one from the catalog: `/harness rules <name>`
 >
 > To write a CUSTOM rule not in this catalog (e.g., language-specific or project-specific patterns), just ask in natural language — e.g., "add an ast-grep rule to ban console.log in components." The `writing-ast-grep-rules` skill handles pattern, format, and testing.
 
-## If a rule name argument is given
+## If a rule name argument is given — install it
 
 1. Verify `${CLAUDE_PLUGIN_ROOT}/templates/<name>.yml` exists. If not, list available templates and stop with "rule not found, here's the catalog."
 

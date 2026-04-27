@@ -33,7 +33,7 @@ This plugin does ONE thing: run `ast-grep` rules on edit and block Claude on fin
 |---|---|
 | `/harness init` | Set up ast-checker in the current project (creates `sgconfig.yml`, `.ast-grep/`, copies a starter rule) |
 | `/harness status` | Show current setup: ast-grep installed?, rules loaded, last scan result |
-| `/harness add-rule` | Browse the rule catalog (no args) or copy a named rule into `.ast-grep/` |
+| `/harness rules` | Browse the rule catalog (no args) or copy a named rule into `.ast-grep/` |
 
 ## How it works
 
@@ -52,7 +52,7 @@ The hook auto-detects the project root (walks up from the edited file looking fo
 Browse [`templates/`](templates/) for the catalog. Each rule is a self-contained YAML file with a metadata header (when to use, when not to, how to adapt).
 
 Three ways:
-- **From the catalog:** `/harness add-rule <name>` — copies a template and surfaces placeholders
+- **From the catalog:** `/harness rules <name>` — copies a template and surfaces placeholders
 - **Custom rule:** ask Claude in natural language ("add an ast-grep rule to ban console.log in components") — the bundled `writing-ast-grep-rules` skill walks Claude through pattern, file location, and testing
 - **Manually:** `cp templates/<rule>.yml /your/project/.ast-grep/` and adapt
 

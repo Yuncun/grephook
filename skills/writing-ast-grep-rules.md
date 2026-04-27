@@ -16,11 +16,19 @@ If the user's request is fuzzy (e.g., "stop using bad fonts"), make it concrete 
 
 Ask the user to clarify if needed.
 
-## Step 2: Verify ast-grep + project setup
+## Step 2: Verify ast-grep + project setup (inline)
 
-1. `command -v ast-grep` — must be installed (`brew install ast-grep` on Mac).
-2. Find project root: `git rev-parse --show-toplevel`.
-3. Confirm `<root>/sgconfig.yml` and `<root>/.ast-grep/` exist. If not, run `/harness init` first.
+1. `command -v ast-grep` — must be installed. If missing: tell user to `brew install ast-grep` (Mac) or `cargo install ast-grep --locked` and STOP.
+2. Find project root: `git rev-parse --show-toplevel`. If not a git repo, fall back to cwd but warn the user.
+3. Set up the project structure inline if missing — don't delegate to `/harness init`:
+   - If `<root>/.ast-grep/` doesn't exist: `mkdir -p <root>/.ast-grep` and tell the user "created `.ast-grep/`."
+   - If `<root>/sgconfig.yml` doesn't exist: write it with:
+     ```yaml
+     ruleDirs:
+       - .ast-grep
+     ```
+     and tell the user "created `sgconfig.yml`."
+   - If both exist: continue silently.
 
 ## Step 3: Draft the rule
 
