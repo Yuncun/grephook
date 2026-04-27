@@ -1,8 +1,8 @@
 ---
-description: Set up ast-checker in the current project
+description: Set up grephook in the current project
 ---
 
-You are setting up ast-checker for the user's project. Follow these steps in order. Be concise — at each step, just state what you're doing and the result.
+You are setting up grephook for the user's project. Follow these steps in order. Be concise — at each step, just state what you're doing and the result.
 
 ## Step 1: Find the project root (and refuse if not in a project)
 
@@ -10,7 +10,7 @@ Try `git rev-parse --show-toplevel` first. If that errors, look for any of these
 
 **If none of those exist, abort with this message:**
 
-> No project detected in `<cwd>`. ast-checker scaffolds files (`sgconfig.yml`, `.ast-grep/`) into a project root — running this in a workspace root or random directory would pollute it. Either:
+> No project detected in `<cwd>`. grephook scaffolds files (`sgconfig.yml`, `.ast-grep/`) into a project root — running this in a workspace root or random directory would pollute it. Either:
 > - `cd` into a project directory and re-run, OR
 > - if this IS your project root, create a marker first (e.g. `git init`, `npm init -y`, etc.) so the tool knows it's a project.
 

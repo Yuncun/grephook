@@ -2,7 +2,7 @@
 description: Show a scorecard of how often each ast-grep rule has fired in this project, with timing
 ---
 
-You are showing a scorecard for ast-checker rule fires in the current project. Read the log and present aggregate stats.
+You are showing a scorecard for grephook rule fires in the current project. Read the log and present aggregate stats.
 
 ## Step 1: Find the log
 

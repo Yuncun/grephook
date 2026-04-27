@@ -1,6 +1,6 @@
 ---
 name: writing-ast-grep-rules
-description: Use when the user wants to write or add a new ast-grep rule for the ast-checker plugin (e.g., "add a rule to stop X", "ban Y in our codebase", "write an ast-grep rule for Z"). Walks through intent capture, sample writing, pattern testing, and verification — based on the ast-grep team's canonical 5-step methodology.
+description: Use when the user wants to write or add a new ast-grep rule for the grephook plugin (e.g., "add a rule to stop X", "ban Y in our codebase", "write an ast-grep rule for Z"). Walks through intent capture, sample writing, pattern testing, and verification — based on the ast-grep team's canonical 5-step methodology.
 ---
 
 <!--
@@ -21,7 +21,7 @@ copied from them as draft and run the same verification this skill does.
 -->
 
 
-# Writing ast-grep rules for ast-checker
+# Writing ast-grep rules for grephook
 
 The user wants a custom ast-grep rule in their project. Follow this workflow. It's based on the ast-grep team's own guidance for AI-generated rules — each step prevents a specific failure mode.
 

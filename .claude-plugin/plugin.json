@@ -1,7 +1,7 @@
 {
-  "name": "ast-checker",
+  "name": "grephook",
   "description": "Runs ast-grep architecture rules on every Claude edit. Ships a curated catalog of rules for common LLM shortcuts. Multi-language via tree-sitter.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "author": {
     "name": "Eric Shen"
   },

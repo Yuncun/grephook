@@ -1,6 +1,6 @@
-# Working on the ast-checker plugin
+# Working on the grephook plugin
 
-This repo IS the `ast-checker` plugin published in the `yuncun` marketplace. Templates in `templates/` ship to every install.
+This repo IS the `grephook` plugin published in the `yuncun` marketplace. Templates in `templates/` ship to every install.
 
 ## Adding a new rule to the catalog
 

@@ -1,6 +1,8 @@
-# ast-checker
+# grephook
 
-A Claude Code plugin that runs [ast-grep](https://ast-grep.github.io/) on every file Claude edits, blocking Claude when project-specific architecture rules fail. Multi-language via tree-sitter (Python, JS, Go, Rust, Java, Kotlin, Ruby, etc.).
+**grephook** is a Claude Code plugin that uses [ast-grep](https://ast-grep.github.io/) to deterministically prevent Claude from ignoring your coding rules. Built as an alternative to begging Claude to follow CLAUDE.md.
+
+Multi-language via tree-sitter (Python, JS, Go, Rust, Java, Kotlin, Ruby, etc.).
 
 ## What this is for
 
@@ -22,7 +24,7 @@ This plugin does ONE thing: run `ast-grep` rules on edit and block Claude on fin
 1. Install ast-grep: `brew install ast-grep` (or `cargo install ast-grep --locked`)
 2. Install plugin (assumes you've added the marketplace):
    ```
-   /plugin install ast-checker@yuncun
+   /plugin install grephook@yuncun
    ```
 3. In your project, run `/harness init` — scaffolds `sgconfig.yml` + `.ast-grep/` with a starter rule.
 4. Adapt the starter rule to your project (file paths, field names). Edit a file. Watch Claude get blocked and self-correct.
@@ -31,7 +33,7 @@ This plugin does ONE thing: run `ast-grep` rules on edit and block Claude on fin
 
 | Command | What it does |
 |---|---|
-| `/harness init` | Set up ast-checker in the current project (creates `sgconfig.yml`, `.ast-grep/`, copies a starter rule) |
+| `/harness init` | Set up grephook in the current project (creates `sgconfig.yml`, `.ast-grep/`, copies a starter rule) |
 | `/harness status` | Show current setup: ast-grep installed?, rules loaded, last scan result |
 | `/harness rules` | Browse the rule catalog (no args) or copy a named rule into `.ast-grep/` |
 

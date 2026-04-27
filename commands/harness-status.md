@@ -1,8 +1,8 @@
 ---
-description: Show ast-checker status for the current project
+description: Show grephook status for the current project
 ---
 
-You are showing a status report for ast-checker. Be concise — gather the data and present a clean table.
+You are showing a status report for grephook. Be concise — gather the data and present a clean table.
 
 ## Gather
 
