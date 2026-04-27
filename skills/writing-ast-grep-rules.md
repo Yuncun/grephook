@@ -1,38 +1,64 @@
 ---
 name: writing-ast-grep-rules
-description: Use when the user wants to write or add a new ast-grep rule for the ast-checker plugin (e.g., "add a rule to stop X", "ban Y in our codebase", "write an ast-grep rule for Z"). Walks through pattern syntax, file location, metadata, testing, and verification.
+description: Use when the user wants to write or add a new ast-grep rule for the ast-checker plugin (e.g., "add a rule to stop X", "ban Y in our codebase", "write an ast-grep rule for Z"). Walks through intent capture, sample writing, pattern testing, and verification — based on the ast-grep team's canonical 5-step methodology.
 ---
+
+<!--
+Workflow design adapted from the ast-grep maintainer's post on AI-generated rules:
+https://ast-grep.github.io/blog/ast-grep-agent.html
+
+Key principles imported:
+- Five-step flow: intent → samples → rule → test against samples → verify against codebase
+- Compounding errors: small mistakes early snowball; verify each step
+- Hallucination is real: even Claude invents non-existent syntax sometimes — test interactively before saving
+- Iterate until correct, don't expect first-attempt perfection
+- Don't follow this rigidly if the user's intent can't be expressed structurally — flag and suggest alternatives instead
+-->
 
 # Writing ast-grep rules for ast-checker
 
-The user wants a custom ast-grep rule in their project. Follow this workflow.
+The user wants a custom ast-grep rule in their project. Follow this workflow. It's based on the ast-grep team's own guidance for AI-generated rules — each step prevents a specific failure mode.
 
-## Step 1: Translate intent into a concrete pattern
+## Step 1: Capture intent (concrete code shape, not behavior)
 
-If the user's request is fuzzy (e.g., "stop using bad fonts"), make it concrete BEFORE writing:
-- What language? (Python, JavaScript, Vue, Go, Rust, Kotlin, Java, CSS, etc.)
-- What files should the rule apply to? (path glob)
-- What's the EXACT code shape to forbid? Translate "no bad fonts" → "ban `font-family: $X` declarations in `.css` files outside `src/styles/tokens.css`."
+Translate the user's request into a SPECIFIC pattern of code to forbid. If their request is fuzzy, push for concretion before continuing.
 
-Ask the user to clarify if needed.
+Example translations:
+- "stop using bad fonts" → "ban `font-family: $X` declarations in `.css` files outside `src/styles/tokens.css`"
+- "no print debugging" → "ban `print($X)` calls in `.py` files outside `tests/`"
+- "use our logger" → "ban `console.log($X)` calls outside `src/utils/logger.js`"
 
-## Step 2: Verify ast-grep + project setup (inline)
+Confirm the translated intent with the user before continuing.
 
-1. `command -v ast-grep` — must be installed. If missing: tell user to `brew install ast-grep` (Mac) or `cargo install ast-grep --locked` and STOP.
-2. Find project root: `git rev-parse --show-toplevel`. If not a git repo, fall back to cwd but warn the user.
-3. Set up the project structure inline if missing — don't delegate to `/harness init`:
-   - If `<root>/.ast-grep/` doesn't exist: `mkdir -p <root>/.ast-grep` and tell the user "created `.ast-grep/`."
-   - If `<root>/sgconfig.yml` doesn't exist: write it with:
+**If the intent is genuinely not structural** (e.g., "ban functions with cyclomatic complexity > 10"), STOP and tell the user ast-grep can't express this — suggest a different tool (radon for Python complexity, etc.).
+
+## Step 2: Write sample code (BEFORE drafting the rule)
+
+This is the step that prevents the rest of the workflow from compounding errors. Write 3-4 short code snippets:
+
+- 1 INVALID example: code that should match (the rule should fire on this)
+- 2-3 VALID examples: code that should NOT match (rule should be silent on these — pick edge cases that test the rule's scope)
+
+Show them to the user. Confirm: "When I save the rule, the invalid example should be flagged and the valid examples should not. Does this match what you want?"
+
+If user disagrees, refine the intent (Step 1) before continuing.
+
+## Step 3: Verify ast-grep + project setup (inline, no delegation)
+
+1. Check `command -v ast-grep`. Missing → tell user `brew install ast-grep` and STOP.
+2. Find project root: `git rev-parse --show-toplevel` (fall back to cwd, warn if not a git repo).
+3. Set up the project structure inline:
+   - If `<root>/.ast-grep/` missing: `mkdir -p <root>/.ast-grep` (announce: "created `.ast-grep/`")
+   - If `<root>/sgconfig.yml` missing: write it with:
      ```yaml
      ruleDirs:
        - .ast-grep
      ```
-     and tell the user "created `sgconfig.yml`."
-   - If both exist: continue silently.
+     (announce: "created `sgconfig.yml`")
 
-## Step 3: Draft the rule
+## Step 4: Draft the rule + test it interactively (iterate until correct)
 
-ast-grep YAML format:
+Draft the rule pattern:
 
 ```yaml
 id: <kebab-case-name>
@@ -40,84 +66,91 @@ language: <python|javascript|typescript|vue|go|rust|kotlin|java|css|...>
 rule:
   pattern: <pattern in target language with $X / $$$ metavariables>
 files:
-  - <glob1>
-  - <glob2>
+  - <glob>
 message: |
   <Clear explanation of what's forbidden + how to fix it.>
 
-  Why this rule exists: <reason — Claude reads this during the redirect, so a clear "why" helps it pick a good fix.>
+  Why this rule exists: <reason — Claude reads this during the redirect.>
 severity: error
 ```
 
-Pattern syntax basics:
-- Patterns LOOK LIKE the language. `pattern: foo($X)` matches any call to `foo(...)`.
-- `$X` matches a single node. `$$$X` matches a sequence (e.g., function args).
-- For composite rules (matching inside other constructs), use `inside:` with `stopBy: end`. To constrain by name, add `has: { field: name, regex: "^pattern_" }`.
-- Constrain a metavariable's text: add `constraints:` block at rule top level: `constraints: { METHOD: { regex: "^(generate|repose)$" } }`.
+**Now test the pattern against your samples WITHOUT saving the rule.** Use `ast-grep run`:
 
-Save to `<project-root>/.ast-grep/<name>.yml`.
+```bash
+# Should match (invalid sample):
+echo '<invalid sample>' | ast-grep run --pattern '<your pattern>' --lang <language> --stdin
 
-## Step 4: Verify zero false positives (CRITICAL)
+# Should NOT match (valid samples):
+echo '<valid sample 1>' | ast-grep run --pattern '<your pattern>' --lang <language> --stdin
+echo '<valid sample 2>' | ast-grep run --pattern '<your pattern>' --lang <language> --stdin
+```
+
+**Iterate.** If the pattern misses the invalid sample or fires on a valid sample, the pattern is wrong — adjust it and re-test. ast-grep patterns can be subtle:
+- `$X.foo($$$)` matches any args; `$X.foo($Y)` matches exactly one arg
+- For composite rules: `inside:` traverses parent; add `stopBy: end` to traverse all ancestors
+- For metavariable name constraints: use `constraints: { METHOD: { regex: "..." } }` at rule top level
+
+Don't proceed to Step 5 until ALL samples behave correctly. If you can't find a pattern that works after a few iterations, tell the user — sometimes ast-grep's structural matching genuinely can't express the intent, and a different approach is needed.
+
+## Step 5: Save the rule with metadata
+
+Once the pattern works on samples, save to `<project-root>/.ast-grep/<name>.yml` with this header prepended:
+
+```yaml
+# Added: <today's date YYYY-MM-DD>
+# Catches: <one-line summary of what fires the rule>
+# Why I added this: <first-person reminder — what user goal this serves, what was happening before>
+```
+
+The `# Why I added this:` is for the user's future-self when they wonder "why does this rule exist?" — keep it factual, not presumptive.
+
+## Step 6: Verify against the actual codebase
 
 Run `ast-grep scan` from the project root.
 
-- If the rule fires on existing code → either the rule is too broad OR existing code already violates it. Fix one before declaring done. **Do not commit a rule that fires on legitimate code** — false positives train Claude to suppress the rule.
+- If it fires on existing code: either the rule is too broad OR existing code already violates it. Investigate.
+- **Do not declare done with false positives** — they train Claude (and the user) to ignore the rule.
 
-## Step 5: Add a test fixture (recommended)
+## Step 7: Add a permanent test fixture
 
-Create `<project-root>/__tests__/<name>-test.yml` (create the dir if needed):
+Create `<project-root>/__tests__/<name>-test.yml` (create the dir if missing):
 
 ```yaml
 id: <name>
 valid:
-  - <code that should NOT match — at least 2 examples covering edge cases>
+  - <reuse valid sample 1 from Step 2>
+  - <reuse valid sample 2 from Step 2>
 invalid:
-  - <code that SHOULD match — at least 1 example>
+  - <reuse invalid sample from Step 2>
 ```
 
-If the project's `sgconfig.yml` doesn't yet have a `testConfigs:` entry, add:
+Reuse the samples from Step 2 — don't make up new ones, that risks drift.
+
+If the project's `sgconfig.yml` doesn't have a `testConfigs:` block yet, add:
 ```yaml
 testConfigs:
   - testDir: __tests__
 ```
 
-Then run `ast-grep test --skip-snapshot-tests` from project root. All tests must pass.
+Run `ast-grep test --skip-snapshot-tests` to verify all tests pass.
 
-## Step 6: Add the metadata header
+## Step 8: Confirm to the user
 
-Edit the rule file to prepend a metadata block:
-
-```yaml
-# Added: <today's date YYYY-MM-DD>
-# Catches: <one-line summary>
-# Why I added this: <first-person reminder of intent — what user goal this serves>
-```
-
-This is for the user's future-self when they wonder why a rule exists. Skipping it is fine but discouraged.
-
-## Step 7: Confirm to the user
-
-Summarize:
+Print a summary:
 - Rule name + path saved
 - What it catches (one line)
-- Whether you added a test fixture
-- Confirm the post-edit hook will pick it up automatically on next file edit
+- Test fixture added (yes/no, path)
+- Confirmation that the post-edit hook will pick it up automatically on next file edit
 
-## Tips on patterns by language
+## Pattern syntax reference
 
-- **Python**: `pattern: $X.method($$$)` works for any object's method call. For decorators, `pattern: "@$DECORATOR\ndef $FN($$$): $$$"`.
-- **JavaScript/TypeScript**: `pattern: console.$METHOD($$$)` then constraint METHOD regex `"^(log|debug)$"` to ban specific console methods.
-- **Vue SFCs**: ast-grep parses them via the JS/TS parser for `<script>` blocks. Rules use `language: javascript` or `language: typescript`.
-- **Imports**: `pattern: import $X from "$LIB"` (JS) or `pattern: from $LIB import $X` (Python). Constrain `LIB` regex to ban specific packages.
-- **CSS**: `pattern: "font-family: $X"` to match font declarations. Note: ast-grep CSS support is via tree-sitter; check that the pattern parses with `ast-grep run --pattern '...' --lang css`.
+For the actual pattern syntax beyond the basics above, see [ast-grep rule essentials](https://ast-grep.github.io/guide/rule-config.html). Don't invent syntax — when unsure, look it up or test it interactively.
 
-## When unsure
+## When to deviate from this flow
 
-Test the pattern interactively:
-```bash
-ast-grep run --pattern '<pattern>' --lang <language> path/to/sample.py
-```
+These steps are guidance, not a strict checklist. Reasons to deviate:
+- User explicitly asks to skip testing ("just give me the rule")
+- Pattern is trivial enough that samples are obvious (still recommend testing once before saving)
+- Intent is unexpressible structurally — flag and suggest a different tool
 
-This runs the pattern without saving a rule. Iterate until it matches what you want.
-
-For complex patterns, see [ast-grep's rule essentials docs](https://ast-grep.github.io/guide/rule-config.html).
+Deviation is fine. Sloppy deviation isn't — explain WHY you're skipping a step if you do.
