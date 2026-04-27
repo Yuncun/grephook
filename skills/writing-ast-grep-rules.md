@@ -140,12 +140,29 @@ testConfigs:
 
 Run `ast-grep test --skip-snapshot-tests` to verify all tests pass.
 
-## Step 8: Confirm to the user
+## Step 8: Cross-check community catalogs (post-hoc, optional)
+
+NOW that your rule is working and tested, briefly check whether a similar rule already exists in:
+- Official catalog: `https://ast-grep.github.io/catalog/<language>/` (e.g., `/css/`, `/typescript/`)
+- Community essentials: `https://github.com/coderabbitai/ast-grep-essentials`
+
+**Why post-hoc:** consulting these BEFORE you draft would bias your pattern toward someone else's framing of the problem. Now that you have a working, tested rule, comparison is safe — you have a baseline.
+
+Use WebFetch with a focused query (1-2 keywords from the user's intent). Don't read the entire catalog.
+
+Then briefly report:
+- "Checked catalog, nothing similar — continuing with your rule" (most common case), OR
+- "Found a similar rule [name + URL]. Comparing: theirs handles X edge case yours doesn't. Want me to swap?"
+
+If a community rule looks cleaner, suggest the swap but don't auto-replace. The user decides — yours is already working.
+
+## Step 9: Confirm to the user
 
 Print a summary:
 - Rule name + path saved
 - What it catches (one line)
 - Test fixture added (yes/no, path)
+- Cross-check result (catalog match found / none / better alternative)
 - Confirmation that the post-edit hook will pick it up automatically on next file edit
 
 ## Pattern syntax reference
