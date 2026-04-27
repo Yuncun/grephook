@@ -4,9 +4,19 @@ description: Set up ast-checker in the current project
 
 You are setting up ast-checker for the user's project. Follow these steps in order. Be concise — at each step, just state what you're doing and the result.
 
-## Step 1: Find the project root
+## Step 1: Find the project root (and refuse if not in a project)
 
-Run `git rev-parse --show-toplevel` in the current directory. If it errors (not a git repo), use the current working directory as the project root.
+Try `git rev-parse --show-toplevel` first. If that errors, look for any of these project markers in the current directory: `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `pom.xml`, `Gemfile`, `composer.json`, `build.gradle`, `build.gradle.kts`, `sgconfig.yml`.
+
+**If none of those exist, abort with this message:**
+
+> No project detected in `<cwd>`. ast-checker scaffolds files (`sgconfig.yml`, `.ast-grep/`) into a project root — running this in a workspace root or random directory would pollute it. Either:
+> - `cd` into a project directory and re-run, OR
+> - if this IS your project root, create a marker first (e.g. `git init`, `npm init -y`, etc.) so the tool knows it's a project.
+
+Stop. Don't create any files.
+
+If a project root was found (via git or marker), continue.
 
 ## Step 2: Verify ast-grep is installed
 
