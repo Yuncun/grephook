@@ -1,8 +1,8 @@
 # grephook
 
-**grephook** is a Claude Code plugin that uses [ast-grep](https://ast-grep.github.io/) to deterministically prevent Claude from ignoring your coding rules. Built as an alternative to begging Claude to follow CLAUDE.md.
+**grephook** is a Claude Code plugin to help prevent Claude from breaking your project's coding rules by automatically running non-LLM checkers on files that Claude edits. Built as a scalable alternative to begging Claude to follow your bloated claude.md.
 
-Multi-language via tree-sitter (Python, JS, Go, Rust, Java, Kotlin, Ruby, etc.).
+Rules checking is handled by [ast-grep](https://ast-grep.github.io/), which supports multi-language via tree-sitter (Python, JS, Go, Rust, Java, Kotlin, Ruby, etc.), but you can easily edit grephook to run additional linters/tools (or write your own).
 
 ## What this is for
 
